@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block page_title %}Sales Analytics{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Summary KPIs -->
+{% if summary %}
+<div class="stats-grid" style="margin-bottom:28px;">
+  <div class="stat-card" style="--accent-color:#00e5a0;">
+    <div class="stat-label">Total Revenue</div>
+    <div class="stat-value">£{{ "{:,.0f}".format(summary.get('total_revenue',0)|float) }}</div>
+  </div>
+  <div class="stat-card" style="--accent-color:#0099ff;">
+    <div class="stat-label">Transactions</div>
+    <div class="stat-value">{{ "{:,}".format(summary.get('total_transactions',0)|int) }}</div>
+  </div>
+  <div class="stat-card" style="--accent-color:#a78bfa;">
+    <div class="stat-label">Avg Transaction</div>
+    <div class="stat-value">£{{ "%.2f"|format(summary.get('avg_transaction_value',0)|float) }}</div>
+  </div>
+  <div class="stat-card" style="--accent-color:#34d399;">
+    <div class="stat-label">Units Sold</div>
+    <div class="stat-value">{{ "{:,}".format(summary.get('total_units_sold',0)|int) }}</div>
+  </div>
+</div>
+{% endif %}
+
+<div class="grid-2" style="margin-bottom:20px;">
+  <!-- Revenue by Category -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">Revenue by Category</span></div>
+    <canvas id="catChart" height="220"></canvas>
+  </div>
+  <!-- Daily Revenue -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">Daily Revenue (last 30 days)</span></div>
+    <canvas id="dailyChart" height="220"></canvas>
+  </div>
+</div>
+
+<div class="grid-2">
+  <!-- Top Products -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">Top 10 Products by Revenue</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Product</th><th>Revenue</th><th>Units</th></tr></thead>
+        <tbody>
+        {% for p in top_prod %}
+        <tr>
+          <td>{{ p.product_name[:25] }}</td>
+          <td style="color:var(--accent);">£{{ "{:,.2f}".format(p.total_revenue|float) }}</td>
+          <td>{{ "{:,}".format(p.units_sold|int) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" style="color:var(--muted);text-align:center;">No data</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Sales by Cashier -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">Sales by Cashier</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Cashier</th><th>Revenue</th><th>Transactions</th><th>Avg</th></tr></thead>
+        <tbody>
+        {% for c in by_cash %}
+        <tr>
+          <td>{{ c.cashier_name }}</td>
+          <td style="color:var(--accent);">£{{ "{:,.0f}".format(c.total_revenue|float) }}</td>
+          <td>{{ "{:,}".format(c.transactions|int) }}</td>
+          <td style="color:var(--muted);">£{{ "%.2f"|format(c.avg_txn_value|float) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" style="color:var(--muted);text-align:center;">No data</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const chartDefaults = {
+  color: '#6b7280',
+  borderColor: '#1e2330',
+  font: { family: "'DM Mono', monospace", size: 11 }
+};
+Chart.defaults.color = chartDefaults.color;
+Chart.defaults.borderColor = chartDefaults.borderColor;
+Chart.defaults.font = chartDefaults.font;
+
+// Category Chart
+const catData = {{ by_cat | tojson }};
+if (catData.length > 0) {
+  new Chart(document.getElementById('catChart'), {
+    type: 'bar',
+    data: {
+      labels: catData.map(d => d.category),
+      datasets: [{
+        label: 'Revenue (£)',
+        data: catData.map(d => parseFloat(d.total_revenue).toFixed(2)),
+        backgroundColor: 'rgba(0,229,160,0.2)',
+        borderColor: '#00e5a0',
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#1e2330' } },
+        y: { grid: { color: '#1e2330' } }
+      }
+    }
+  });
+}
+
+// Daily Revenue Chart
+const dailyData = {{ daily | tojson }};
+if (dailyData.length > 0) {
+  new Chart(document.getElementById('dailyChart'), {
+    type: 'line',
+    data: {
+      labels: dailyData.map(d => {
+        const dt = new Date(d.txn_time);
+        return dt.toLocaleDateString('en-GB', {month:'short', day:'numeric'});
+      }),
+      datasets: [{
+        label: 'Revenue (£)',
+        data: dailyData.map(d => parseFloat(d.revenue).toFixed(2)),
+        borderColor: '#0099ff',
+        backgroundColor: 'rgba(0,153,255,0.08)',
+        borderWidth: 2,
+        pointRadius: 2,
+        fill: true,
+        tension: 0.4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#1e2330' } },
+        y: { grid: { color: '#1e2330' } }
+      }
+    }
+  });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Products{% endblock %}
+{% block page_title %}Product Management{% endblock %}
+
+{% block content %}
+<!-- Search & Filter Bar -->
+<div class="card" style="margin-bottom:20px;">
+  <form method="GET" action="{{ url_for('products') }}" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+    <div class="form-group" style="flex:1;min-width:180px;margin:0;">
+      <label class="form-label">Search</label>
+      <input class="form-control" name="q" value="{{ keyword }}" placeholder="Name or category..."/>
+    </div>
+    <div class="form-group" style="min-width:160px;margin:0;">
+      <label class="form-label">Category</label>
+      <select class="form-control" name="category">
+        <option value="">All Categories</option>
+        {% for c in categories %}
+        <option value="{{ c }}" {% if c==selected_cat %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="btn btn-primary" type="submit">Search</button>
+    <a href="{{ url_for('products') }}" class="btn btn-secondary">Reset</a>
+    {% if session.role in ['admin','manager'] %}
+    <a href="{{ url_for('add_product_route') }}" class="btn btn-primary" style="margin-left:auto;">⊕ Add Product</a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Products Table -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Products ({{ products|length }} shown)</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>ID</th><th>Name</th><th>Category</th>
+        <th>Price</th><th>Stock</th><th>Reorder</th><th>Status</th>
+        {% if session.role in ['admin','manager'] %}<th>Actions</th>{% endif %}
+      </tr></thead>
+      <tbody>
+      {% for p in products %}
+      <tr>
+        <td style="color:var(--muted);">#{{ p.product_id }}</td>
+        <td>{{ p.product_name }}</td>
+        <td><span class="badge badge-blue">{{ p.category }}</span></td>
+        <td>£{{ "%.2f"|format(p.unit_price|float) }}</td>
+        <td>{{ p.stock_qty }}</td>
+        <td>{{ p.reorder_level }}</td>
+        <td>
+          {% if p.stock_qty == 0 %}
+          <span class="badge badge-red">OUT OF STOCK</span>
+          {% elif p.stock_qty <= p.reorder_level %}
+          <span class="badge badge-orange">LOW STOCK</span>
+          {% else %}
+          <span class="badge badge-green">OK</span>
+          {% endif %}
+        </td>
+        {% if session.role in ['admin','manager'] %}
+        <td>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <a href="{{ url_for('edit_product_route', pid=p.product_id) }}" class="btn btn-secondary btn-sm btn-icon" title="Edit">✎</a>
+            <button class="btn btn-secondary btn-sm btn-icon" onclick="openStockModal({{ p.product_id }}, '{{ p.product_name }}')" title="Adjust Stock">⇅</button>
+            {% if session.role == 'admin' %}
+            <form method="POST" action="{{ url_for('delete_product_route', pid=p.product_id) }}" onsubmit="return confirm('Delete this product?')" style="display:inline;">
+              <button class="btn btn-danger btn-sm btn-icon" type="submit" title="Delete">✕</button>
+            </form>
+            {% endif %}
+          </div>
+        </td>
+        {% endif %}
+      </tr>
+      {% else %}
+      <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px;">No products found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Stock Adjustment Modal -->
+<div class="modal-overlay" id="stockModal">
+  <div class="modal">
+    <div class="modal-title">Adjust Stock — <span id="modalProductName"></span></div>
+    <form method="POST" id="stockForm">
+      <div class="form-group">
+        <label class="form-label">Quantity Change (+ to add, - to reduce)</label>
+        <input class="form-control" type="number" name="delta" required placeholder="e.g. 50 or -10"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Reason</label>
+        <input class="form-control" type="text" name="reason" value="restock" placeholder="Reason for adjustment"/>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+        <button type="button" class="btn btn-secondary" onclick="closeStockModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Update Stock</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openStockModal(pid, name) {
+  document.getElementById('modalProductName').textContent = name;
+  document.getElementById('stockForm').action = '/products/stock/' + pid;
+  document.getElementById('stockModal').classList.add('open');
+}
+function closeStockModal() {
+  document.getElementById('stockModal').classList.remove('open');
+}
+document.getElementById('stockModal').addEventListener('click', function(e) {
+  if (e.target === this) closeStockModal();
+});
+</script>
+{% endblock %}

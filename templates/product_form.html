@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} Product{% endblock %}
+{% block page_title %}{{ action }} Product{% endblock %}
+
+{% block content %}
+<div style="max-width:560px;">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">{{ action }} Product</span>
+      <a href="{{ url_for('products') }}" class="btn btn-secondary btn-sm">← Back</a>
+    </div>
+    <form method="POST">
+      <div class="form-group">
+        <label class="form-label">Product Name</label>
+        <input class="form-control" type="text" name="product_name"
+               value="{{ product.product_name if product else '' }}" required placeholder="e.g. Organic Sourdough Bread"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <input class="form-control" type="text" name="category"
+               value="{{ product.category if product else '' }}" required
+               placeholder="e.g. Bakery, Dairy, Produce..."/>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Unit Price (£)</label>
+          <input class="form-control" type="number" name="unit_price" step="0.01" min="0"
+                 value="{{ product.unit_price if product else '' }}" required placeholder="0.00"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reorder Level</label>
+          <input class="form-control" type="number" name="reorder_level" min="0"
+                 value="{{ product.reorder_level if product else 10 }}" required/>
+        </div>
+      </div>
+      {% if not product %}
+      <div class="form-group">
+        <label class="form-label">Initial Stock Quantity</label>
+        <input class="form-control" type="number" name="stock_qty" min="0" value="0" required/>
+      </div>
+      {% endif %}
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button class="btn btn-primary" type="submit">{{ action }} Product</button>
+        <a href="{{ url_for('products') }}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

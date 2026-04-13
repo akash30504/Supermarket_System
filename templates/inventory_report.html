@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Inventory Report{% endblock %}
+{% block page_title %}Inventory Report{% endblock %}
+{% block content %}
+{% if low_stock %}
+<div class="card" style="margin-bottom:20px;border-color:rgba(255,107,53,0.4);">
+  <div class="card-header">
+    <span class="card-title" style="color:var(--warn);">⚠ Low Stock Alert — {{ low_stock|length }} products</span>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    {% for p in low_stock %}
+    <span class="badge {% if p.stock_qty==0 %}badge-red{% else %}badge-orange{% endif %}">
+      {{ p.product_name }} ({{ p.stock_qty }})
+    </span>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Full Inventory ({{ inventory|length }} products)</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>ID</th><th>Name</th><th>Category</th><th>Price</th>
+        <th>Stock</th><th>Stock Value</th><th>Status</th>
+      </tr></thead>
+      <tbody>
+      {% for p in inventory %}
+      <tr>
+        <td style="color:var(--muted);">#{{ p.product_id }}</td>
+        <td>{{ p.product_name }}</td>
+        <td><span class="badge badge-blue">{{ p.category }}</span></td>
+        <td>£{{ "%.2f"|format(p.unit_price|float) }}</td>
+        <td>{{ p.stock_qty }}</td>
+        <td>£{{ "{:,.2f}".format(p.stock_value|float) }}</td>
+        <td>
+          {% if p.status == 'OUT_OF_STOCK' %}<span class="badge badge-red">OUT</span>
+          {% elif p.status == 'LOW_STOCK' %}<span class="badge badge-orange">LOW</span>
+          {% else %}<span class="badge badge-green">OK</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

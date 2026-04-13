@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stat Cards -->
+<div class="stats-grid">
+  <div class="stat-card" style="--accent-color:#00e5a0;">
+    <div class="stat-label">Total Products</div>
+    <div class="stat-value">{{ inv.get('total_products',0)|int }}</div>
+    <div class="stat-sub">{{ inv.get('out_of_stock',0)|int }} out of stock</div>
+  </div>
+  <div class="stat-card" style="--accent-color:#0099ff;">
+    <div class="stat-label">Total Units</div>
+    <div class="stat-value">{{ "{:,}".format(inv.get('total_units',0)|int) }}</div>
+    <div class="stat-sub">across all products</div>
+  </div>
+  <div class="stat-card" style="--accent-color:#ff6b35;">
+    <div class="stat-label">Stock Value</div>
+    <div class="stat-value">£{{ "{:,.0f}".format(inv.get('total_stock_value',0)|float) }}</div>
+    <div class="stat-sub">estimated retail value</div>
+  </div>
+  <div class="stat-card" style="--accent-color:#ff3b5c;">
+    <div class="stat-label">Low Stock Alerts</div>
+    <div class="stat-value">{{ inv.get('low_stock_count',0)|int }}</div>
+    <div class="stat-sub">need restocking</div>
+  </div>
+  {% if sales %}
+  <div class="stat-card" style="--accent-color:#a78bfa;">
+    <div class="stat-label">Total Revenue</div>
+    <div class="stat-value">£{{ "{:,.0f}".format(sales.get('total_revenue',0)|float) }}</div>
+    <div class="stat-sub">all transactions</div>
+  </div>
+  <div class="stat-card" style="--accent-color:#34d399;">
+    <div class="stat-label">Transactions</div>
+    <div class="stat-value">{{ "{:,}".format(sales.get('total_transactions',0)|int) }}</div>
+    <div class="stat-sub">avg £{{ "%.2f"|format(sales.get('avg_transaction_value',0)|float) }} each</div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="grid-2">
+  <!-- Recent Transactions -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Recent Transactions</span>
+      <a href="{{ url_for('transactions') }}" class="btn btn-secondary btn-sm">View All</a>
+    </div>
+    <div class="table-wrap">
+      {% if recent_txns %}
+      <table>
+        <thead><tr>
+          <th>ID</th><th>Product</th><th>Qty</th><th>Total</th><th>Time</th>
+        </tr></thead>
+        <tbody>
+        {% for t in recent_txns %}
+        <tr>
+          <td>#{{ t.txn_id }}</td>
+          <td>{{ t.product_name[:22] }}</td>
+          <td>{{ t.quantity }}</td>
+          <td>£{{ "%.2f"|format(t.total_value|float) }}</td>
+          <td style="color:var(--muted);font-size:11px;">{{ t.txn_time|string|truncate(16,true,'') }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p style="color:var(--muted);font-size:13px;padding:16px 0;">No transactions yet. Seed demo data to get started.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Low Stock Alerts -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Low Stock Alerts</span>
+      <a href="{{ url_for('inventory_analytics') }}" class="btn btn-secondary btn-sm">Full Report</a>
+    </div>
+    {% if low_stock %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Product</th><th>Stock</th><th>Reorder</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for p in low_stock %}
+        <tr>
+          <td>{{ p.product_name[:22] }}</td>
+          <td>{{ p.stock_qty }}</td>
+          <td>{{ p.reorder_level }}</td>
+          <td>
+            {% if p.stock_qty == 0 %}
+            <span class="badge badge-red">OUT</span>
+            {% else %}
+            <span class="badge badge-orange">LOW</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p style="color:var(--accent);font-size:13px;padding:8px 0;">✔ All products adequately stocked.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

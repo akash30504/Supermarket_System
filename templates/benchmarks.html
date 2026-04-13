@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Benchmarks{% endblock %}
+{% block page_title %}Performance Benchmarks{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:20px;">
+  <div class="card" style="border-color:rgba(0,229,160,0.2);">
+    <div class="card-header">
+      <span class="card-title">About Benchmarks</span>
+    </div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;">
+      These benchmarks measure the performance of this system's HPC components and security overhead.
+      Results demonstrate the difference between sequential, threaded, and multiprocessing modes,
+      and quantify the cost of security mechanisms (auth, RBAC, audit logging).
+    </p>
+  </div>
+</div>
+
+<div class="grid-3">
+  <!-- Vectorized Benchmark -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">⚡ NumPy vs Loop</span>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">
+      Compares Python loop vs NumPy vectorized operations on 100,000 transactions.
+    </p>
+    <button class="btn btn-primary" onclick="runBenchmark('vectorized', this)">Run Benchmark</button>
+    <div id="result-vectorized" class="bench-result" style="display:none;"></div>
+  </div>
+
+  <!-- Security Overhead -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🔒 Security Overhead</span>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">
+      Measures µs cost of password hashing, RBAC checks, and audit log writes.
+    </p>
+    <button class="btn btn-primary" onclick="runBenchmark('security', this)">Run Benchmark</button>
+    <div id="result-security" class="bench-result" style="display:none;"></div>
+  </div>
+
+  <!-- Throughput -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">⇄ Transaction Throughput</span>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">
+      Compares sequential vs threaded vs multiprocessing transaction processing speed.
+    </p>
+    <button class="btn btn-primary" onclick="runBenchmark('throughput', this)">Run Benchmark</button>
+    <div id="result-throughput" class="bench-result" style="display:none;"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.bench-result{
+  margin-top:16px;padding:14px;background:var(--surface);
+  border:1px solid var(--border);border-radius:8px;font-size:12px;
+}
+.bench-kv{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);}
+.bench-kv:last-child{border-bottom:none;}
+.bench-kv .key{color:var(--muted);}
+.bench-kv .val{color:var(--accent);font-weight:500;}
+.spinning{animation:spin 1s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+<script>
+async function runBenchmark(type, btn) {
+  const resultDiv = document.getElementById('result-' + type);
+  const origText = btn.textContent;
+  btn.textContent = '⟳ Running...';
+  btn.disabled = true;
+  resultDiv.style.display = 'none';
+
+  try {
+    const formData = new FormData();
+    formData.append('type', type);
+    const res = await fetch('/benchmarks/run', { method: 'POST', body: formData });
+    const data = await res.json();
+
+    if (data.success) {
+      const r = data.result;
+      let html = '';
+      for (const [k, v] of Object.entries(r)) {
+        if (typeof v === 'object') {
+          for (const [k2, v2] of Object.entries(v)) {
+            html += `<div class="bench-kv"><span class="key">[${k}] ${k2}</span><span class="val">${v2}</span></div>`;
+          }
+        } else {
+          html += `<div class="bench-kv"><span class="key">${k}</span><span class="val">${v}</span></div>`;
+        }
+      }
+      resultDiv.innerHTML = html;
+      resultDiv.style.display = 'block';
+    } else {
+      resultDiv.innerHTML = `<div style="color:var(--danger);">Error: ${data.error}</div>`;
+      resultDiv.style.display = 'block';
+    }
+  } catch(e) {
+    resultDiv.innerHTML = `<div style="color:var(--danger);">Request failed: ${e.message}</div>`;
+    resultDiv.style.display = 'block';
+  }
+
+  btn.textContent = origText;
+  btn.disabled = false;
+}
+</script>
+{% endblock %}

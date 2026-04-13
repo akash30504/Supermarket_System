@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>{% block title %}SuperMart{% endblock %} — Secure Supermarket System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:       #0a0c10;
+  --surface:  #111318;
+  --card:     #161a22;
+  --border:   #1e2330;
+  --accent:   #00e5a0;
+  --accent2:  #0099ff;
+  --warn:     #ff6b35;
+  --danger:   #ff3b5c;
+  --text:     #e8eaf0;
+  --muted:    #6b7280;
+  --sidebar-w:240px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+
+/* ── Sidebar ── */
+.sidebar{
+  width:var(--sidebar-w);min-height:100vh;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;z-index:100;
+}
+.sidebar-logo{
+  padding:28px 24px 20px;border-bottom:1px solid var(--border);
+}
+.sidebar-logo .logo-mark{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:20px;
+  color:var(--accent);letter-spacing:-0.5px;
+}
+.sidebar-logo .logo-sub{
+  font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;
+  margin-top:2px;
+}
+.sidebar-user{
+  padding:16px 24px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.user-avatar{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:#000;flex-shrink:0;
+}
+.user-info .name{font-size:13px;font-weight:500;color:var(--text);}
+.user-info .role{font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;}
+
+.nav{flex:1;padding:16px 0;}
+.nav-section{padding:8px 24px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;}
+.nav a{
+  display:flex;align-items:center;gap:10px;padding:10px 24px;
+  color:var(--muted);text-decoration:none;font-size:13px;
+  transition:all 0.15s;border-left:2px solid transparent;
+}
+.nav a:hover{color:var(--text);background:var(--card);}
+.nav a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(0,229,160,0.06);}
+.nav a .icon{font-size:15px;width:18px;text-align:center;}
+
+.sidebar-footer{
+  padding:16px 24px;border-top:1px solid var(--border);
+}
+.sidebar-footer a{
+  display:flex;align-items:center;gap:8px;color:var(--muted);
+  text-decoration:none;font-size:12px;transition:color 0.15s;
+}
+.sidebar-footer a:hover{color:var(--danger);}
+
+/* ── Main Content ── */
+.main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column;}
+.topbar{
+  padding:20px 32px;border-bottom:1px solid var(--border);
+  background:var(--surface);display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;
+}
+.topbar-title{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+
+.content{padding:32px;flex:1;}
+
+/* ── Flash Messages ── */
+.flash-wrap{padding:0 32px;margin-top:16px;}
+.flash{
+  padding:12px 18px;border-radius:8px;font-size:13px;
+  display:flex;align-items:center;gap:10px;margin-bottom:8px;
+}
+.flash.success{background:rgba(0,229,160,0.1);border:1px solid rgba(0,229,160,0.3);color:var(--accent);}
+.flash.error{background:rgba(255,59,92,0.1);border:1px solid rgba(255,59,92,0.3);color:var(--danger);}
+.flash.info{background:rgba(0,153,255,0.1);border:1px solid rgba(0,153,255,0.3);color:var(--accent2);}
+
+/* ── Cards ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text);}
+
+/* ── Stat Cards ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px;}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:20px 24px;position:relative;overflow:hidden;
+}
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--accent-color,var(--accent));
+}
+.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;}
+.stat-value{font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:var(--text);}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+
+/* ── Tables ── */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{
+  padding:10px 16px;text-align:left;font-size:10px;font-weight:500;
+  color:var(--muted);text-transform:uppercase;letter-spacing:1px;
+  border-bottom:1px solid var(--border);background:var(--surface);
+}
+td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text);}
+tr:hover td{background:rgba(255,255,255,0.02);}
+tr:last-child td{border-bottom:none;}
+
+/* ── Badges ── */
+.badge{
+  display:inline-block;padding:3px 10px;border-radius:20px;
+  font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:1px;
+}
+.badge-green{background:rgba(0,229,160,0.15);color:var(--accent);}
+.badge-blue{background:rgba(0,153,255,0.15);color:var(--accent2);}
+.badge-red{background:rgba(255,59,92,0.15);color:var(--danger);}
+.badge-orange{background:rgba(255,107,53,0.15);color:var(--warn);}
+.badge-gray{background:rgba(107,114,128,0.2);color:var(--muted);}
+
+/* ── Buttons ── */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:9px 18px;border-radius:8px;font-family:'DM Mono',monospace;
+  font-size:12px;font-weight:500;cursor:pointer;border:none;
+  text-decoration:none;transition:all 0.15s;
+}
+.btn-primary{background:var(--accent);color:#000;}
+.btn-primary:hover{background:#00cc8a;}
+.btn-secondary{background:var(--border);color:var(--text);}
+.btn-secondary:hover{background:#2a3040;}
+.btn-danger{background:rgba(255,59,92,0.15);color:var(--danger);border:1px solid rgba(255,59,92,0.3);}
+.btn-danger:hover{background:rgba(255,59,92,0.25);}
+.btn-sm{padding:6px 12px;font-size:11px;}
+.btn-icon{padding:7px;border-radius:6px;}
+
+/* ── Forms ── */
+.form-group{margin-bottom:16px;}
+.form-label{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.form-control{
+  width:100%;padding:10px 14px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;
+  transition:border-color 0.15s;
+}
+.form-control:focus{outline:none;border-color:var(--accent);}
+select.form-control{cursor:pointer;}
+
+/* ── Grid ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+
+/* ── Modal ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
+  z-index:200;align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:28px;width:100%;max-width:460px;
+}
+.modal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:20px;}
+
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .main{margin-left:0;}
+  .grid-2,.grid-3{grid-template-columns:1fr;}
+}
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">SuperMart</div>
+    <div class="logo-sub">Secure System v1.0</div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar">{{ session.username[0].upper() }}</div>
+    <div class="user-info">
+      <div class="name">{{ session.username }}</div>
+      <div class="role">{{ session.role }}</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Main</div>
+    <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint=='dashboard' %}active{% endif %}">
+      <span class="icon">◈</span> Dashboard
+    </a>
+    <a href="{{ url_for('products') }}" class="{% if 'product' in request.endpoint %}active{% endif %}">
+      <span class="icon">⊞</span> Products
+    </a>
+    <a href="{{ url_for('transactions') }}" class="{% if 'txn' in request.endpoint or request.endpoint=='transactions' %}active{% endif %}">
+      <span class="icon">⇄</span> Transactions
+    </a>
+
+    {% if session.role in ['admin','manager'] %}
+    <div class="nav-section">Analytics</div>
+    <a href="{{ url_for('analytics') }}" class="{% if request.endpoint=='analytics' %}active{% endif %}">
+      <span class="icon">▲</span> Sales Reports
+    </a>
+    <a href="{{ url_for('inventory_analytics') }}" class="{% if request.endpoint=='inventory_analytics' %}active{% endif %}">
+      <span class="icon">◉</span> Inventory
+    </a>
+    <a href="{{ url_for('benchmarks') }}" class="{% if request.endpoint=='benchmarks' %}active{% endif %}">
+      <span class="icon">⚡</span> Benchmarks
+    </a>
+    {% endif %}
+
+    {% if session.role == 'admin' %}
+    <div class="nav-section">Admin</div>
+    <a href="{{ url_for('users') }}" class="{% if request.endpoint=='users' %}active{% endif %}">
+      <span class="icon">◎</span> Users
+    </a>
+    <a href="{{ url_for('audit') }}" class="{% if request.endpoint=='audit' %}active{% endif %}">
+      <span class="icon">≡</span> Audit Log
+    </a>
+    {% endif %}
+  </nav>
+  <div class="sidebar-footer">
+    <a href="{{ url_for('logout') }}">
+      <span>⏻</span> Logout
+    </a>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">{% block page_title %}Dashboard{% endblock %}</div>
+    <div class="topbar-right">
+      {% if session.role == 'admin' %}
+      <form method="POST" action="{{ url_for('seed') }}" style="display:inline;" onsubmit="return confirm('Seed 1,000 products + 100,000 transactions?')">
+        <button class="btn btn-secondary btn-sm" type="submit">⊕ Seed Demo Data</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="flash-wrap">
+    {% for cat, msg in get_flashed_messages(with_categories=true) %}
+    <div class="flash {{ cat }}">
+      {% if cat == 'success' %}✔{% elif cat == 'error' %}✘{% else %}ℹ{% endif %}
+      {{ msg }}
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="content">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

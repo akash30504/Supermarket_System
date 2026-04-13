@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Audit Log{% endblock %}
+{% block page_title %}Audit Log{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Recent Audit Entries (last 100)</span>
+    <span class="badge badge-blue">Admin Only</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>User</th><th>Action</th><th>Details</th><th>Time</th></tr></thead>
+      <tbody>
+      {% for log in logs %}
+      <tr>
+        <td style="color:var(--muted);">#{{ log.log_id }}</td>
+        <td>{{ log.username or '—' }}</td>
+        <td>
+          {% set action = log.action|string %}
+          {% if 'FAILED' in action or 'DENIED' in action or 'BLOCKED' in action %}
+          <span class="badge badge-red">{{ action }}</span>
+          {% elif 'SUCCESS' in action or 'CREATE' in action %}
+          <span class="badge badge-green">{{ action }}</span>
+          {% elif 'TRANSACTION' in action %}
+          <span class="badge badge-blue">{{ action }}</span>
+          {% else %}
+          <span class="badge badge-gray">{{ action }}</span>
+          {% endif %}
+        </td>
+        <td style="color:var(--muted);font-size:11px;">{{ log.details or '—' }}</td>
+        <td style="color:var(--muted);font-size:11px;">{{ log.log_time|string|truncate(19,true,'') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px;">No audit entries.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
