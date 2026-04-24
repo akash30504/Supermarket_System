@@ -17,7 +17,7 @@
   </div>
   <div class="stat-card" style="--accent-color:#ff6b35;">
     <div class="stat-label">Stock Value</div>
-    <div class="stat-value">£{{ "{:,.0f}".format(inv.get('total_stock_value',0)|float) }}</div>
+    <div class="stat-value">${{ "{:,.0f}".format(inv.get('total_stock_value',0)|float) }}</div>
     <div class="stat-sub">estimated retail value</div>
   </div>
   <div class="stat-card" style="--accent-color:#ff3b5c;">
