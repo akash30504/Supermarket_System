@@ -92,6 +92,7 @@ def seed_transactions(target: int = 100_000, batch_size: int = 5000) -> int:
     Seed approximately `target` transaction records using batch inserts.
     Does NOT deduct stock (historical data simulation).
     Uses a default cashier_id=1 (admin) for seeded data.
+    Transactions are spread across February 2026 (Feb 1 – Feb 28).
     """
     conn = get_connection()
     existing = conn.execute("SELECT COUNT(*) FROM transactions").fetchone()[0]
@@ -124,8 +125,8 @@ def seed_transactions(target: int = 100_000, batch_size: int = 5000) -> int:
     raw_conn.execute("PRAGMA synchronous=NORMAL")
 
     import datetime
-    base_time = datetime.datetime(2026, 2, 27, 8, 0, 0)
-    seconds_per_txn = (30 * 24 * 3600) / target  # spread over 30 days (Feb 27 – Mar 29 2026)
+    base_time = datetime.datetime(2026, 2, 1, 8, 0, 0)
+seconds_per_txn = (28 * 24 * 3600) / target  # spread across all of February 2026
 
     while inserted < needed:
         batch = []
