@@ -37,16 +37,16 @@ CATEGORIES = {
 }
 
 PRICE_RANGES = {
-    "Bakery":        (0.80, 4.50),
-    "Dairy":         (0.60, 6.00),
-    "Beverages":     (0.90, 4.00),
-    "Snacks":        (0.80, 3.50),
-    "Produce":       (0.30, 3.00),
-    "Meat":          (3.00, 18.00),
-    "Frozen":        (1.50, 9.00),
-    "Pantry":        (0.50, 8.00),
-    "Household":     (0.80, 12.00),
-    "Personal Care": (1.50, 15.00),
+    "Bakery":        (150,  850),
+    "Dairy":         (120, 1200),
+    "Beverages":     (180,  900),
+    "Snacks":        (150,  750),
+    "Produce":       ( 60,  600),
+    "Meat":          (600, 3500),
+    "Frozen":        (300, 1800),
+    "Pantry":        (100, 1600),
+    "Household":     (150, 2400),
+    "Personal Care": (300, 3000),
 }
 
 
