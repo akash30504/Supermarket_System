@@ -32,9 +32,9 @@
         <td style="color:var(--muted);">#{{ p.product_id }}</td>
         <td>{{ p.product_name }}</td>
         <td><span class="badge badge-blue">{{ p.category }}</span></td>
-        <td>£{{ "%.2f"|format(p.unit_price|float) }}</td>
+        <td>LKR {{ "%.2f"|format(p.unit_price|float) }}</td>
         <td>{{ p.stock_qty }}</td>
-        <td>£{{ "{:,.2f}".format(p.stock_value|float) }}</td>
+        <td>LKR {{ "{:,.2f}".format(p.stock_value|float) }}</td>
         <td>
           {% if p.status == 'OUT_OF_STOCK' %}<span class="badge badge-red">OUT</span>
           {% elif p.status == 'LOW_STOCK' %}<span class="badge badge-orange">LOW</span>
