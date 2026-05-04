@@ -2,19 +2,27 @@
 {% block title %}Audit Log{% endblock %}
 {% block page_title %}Audit Log{% endblock %}
 {% block content %}
+<div class="page-header">
+  <div>
+    <h1>Audit Log</h1>
+    <p>Tamper-evident security event trail — Admin access only</p>
+  </div>
+  <span class="badge badge-red" style="padding:6px 12px;font-size:11px;">Admin Only</span>
+</div>
+
 <div class="card">
   <div class="card-header">
-    <span class="card-title">Recent Audit Entries (last 100)</span>
-    <span class="badge badge-blue">Admin Only</span>
+    <span class="card-title">Recent Events</span>
+    <span style="font-size:12px;color:var(--text-lt);">Last 100 entries</span>
   </div>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>ID</th><th>User</th><th>Action</th><th>Details</th><th>Time</th></tr></thead>
+      <thead><tr><th>ID</th><th>User</th><th>Action</th><th>Details</th><th>Timestamp</th></tr></thead>
       <tbody>
       {% for log in logs %}
       <tr>
-        <td style="color:var(--muted);">#{{ log.log_id }}</td>
-        <td>{{ log.username or '—' }}</td>
+        <td style="color:var(--text-lt);font-size:12px;">{{ log.log_id }}</td>
+        <td><strong>{{ log.username or '—' }}</strong></td>
         <td>
           {% set action = log.action|string %}
           {% if 'FAILED' in action or 'DENIED' in action or 'BLOCKED' in action %}
@@ -27,11 +35,11 @@
           <span class="badge badge-gray">{{ action }}</span>
           {% endif %}
         </td>
-        <td style="color:var(--muted);font-size:11px;">{{ log.details or '—' }}</td>
-        <td style="color:var(--muted);font-size:11px;">{{ log.log_time|string|truncate(19,true,'') }}</td>
+        <td style="color:var(--text-md);font-size:12.5px;">{{ log.details or '—' }}</td>
+        <td style="color:var(--text-lt);font-size:12px;white-space:nowrap;">{{ log.log_time|string|truncate(19,true,'') }}</td>
       </tr>
       {% else %}
-      <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px;">No audit entries.</td></tr>
+      <tr><td colspan="5" style="text-align:center;color:var(--text-lt);padding:32px;">No audit entries found.</td></tr>
       {% endfor %}
       </tbody>
     </table>

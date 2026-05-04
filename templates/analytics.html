@@ -7,43 +7,50 @@
 {% endblock %}
 
 {% block content %}
-<!-- Summary KPIs -->
-{% if summary %}
-<div class="stats-grid" style="margin-bottom:28px;">
-  <div class="stat-card" style="--accent-color:#00e5a0;">
-    <div class="stat-label">Total Revenue</div>
-    <div class="stat-value">£{{ "{:,.0f}".format(summary.get('total_revenue',0)|float) }}</div>
+<div class="page-header">
+  <div>
+    <h1>Sales Analytics</h1>
+    <p>Revenue, performance and trend analysis</p>
   </div>
-  <div class="stat-card" style="--accent-color:#0099ff;">
+</div>
+
+{% if summary %}
+<div class="stats-grid" style="margin-bottom:22px;">
+  <div class="stat-card" style="--stat-color:#1a5276;">
+    <div class="stat-label">Total Revenue</div>
+    <div class="stat-value" style="font-size:20px;">LKR {{ "{:,.0f}".format(summary.get('total_revenue',0)|float) }}</div>
+  </div>
+  <div class="stat-card" style="--stat-color:#1e8449;">
     <div class="stat-label">Transactions</div>
     <div class="stat-value">{{ "{:,}".format(summary.get('total_transactions',0)|int) }}</div>
   </div>
-  <div class="stat-card" style="--accent-color:#a78bfa;">
+  <div class="stat-card" style="--stat-color:#7d3c98;">
     <div class="stat-label">Avg Transaction</div>
-    <div class="stat-value">£{{ "%.2f"|format(summary.get('avg_transaction_value',0)|float) }}</div>
+    <div class="stat-value" style="font-size:20px;">LKR {{ "%.2f"|format(summary.get('avg_transaction_value',0)|float) }}</div>
   </div>
-  <div class="stat-card" style="--accent-color:#34d399;">
+  <div class="stat-card" style="--stat-color:#d68910;">
     <div class="stat-label">Units Sold</div>
     <div class="stat-value">{{ "{:,}".format(summary.get('total_units_sold',0)|int) }}</div>
   </div>
 </div>
 {% endif %}
 
-<div class="grid-2" style="margin-bottom:20px;">
-  <!-- Revenue by Category -->
+<div class="grid-2" style="margin-bottom:18px;">
   <div class="card">
     <div class="card-header"><span class="card-title">Revenue by Category</span></div>
-    <canvas id="catChart" height="220"></canvas>
+    <div class="card-pad">
+      <canvas id="catChart" height="220"></canvas>
+    </div>
   </div>
-  <!-- Daily Revenue -->
   <div class="card">
-    <div class="card-header"><span class="card-title">Daily Revenue (last 30 days)</span></div>
-    <canvas id="dailyChart" height="220"></canvas>
+    <div class="card-header"><span class="card-title">Daily Revenue — Last 30 Days</span></div>
+    <div class="card-pad">
+      <canvas id="dailyChart" height="220"></canvas>
+    </div>
   </div>
 </div>
 
 <div class="grid-2">
-  <!-- Top Products -->
   <div class="card">
     <div class="card-header"><span class="card-title">Top 10 Products by Revenue</span></div>
     <div class="table-wrap">
@@ -52,34 +59,33 @@
         <tbody>
         {% for p in top_prod %}
         <tr>
-          <td>{{ p.product_name[:25] }}</td>
-          <td style="color:var(--accent);">£{{ "{:,.2f}".format(p.total_revenue|float) }}</td>
+          <td>{{ p.product_name[:28] }}</td>
+          <td class="amount">LKR {{ "{:,.2f}".format(p.total_revenue|float) }}</td>
           <td>{{ "{:,}".format(p.units_sold|int) }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="3" style="color:var(--muted);text-align:center;">No data</td></tr>
+        <tr><td colspan="3" style="color:var(--text-lt);text-align:center;padding:24px;">No data available</td></tr>
         {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- Sales by Cashier -->
   <div class="card">
     <div class="card-header"><span class="card-title">Sales by Cashier</span></div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Cashier</th><th>Revenue</th><th>Transactions</th><th>Avg</th></tr></thead>
+        <thead><tr><th>Cashier</th><th>Revenue</th><th>Transactions</th><th>Avg Value</th></tr></thead>
         <tbody>
         {% for c in by_cash %}
         <tr>
-          <td>{{ c.cashier_name }}</td>
-          <td style="color:var(--accent);">£{{ "{:,.0f}".format(c.total_revenue|float) }}</td>
+          <td><strong>{{ c.cashier_name }}</strong></td>
+          <td class="amount">LKR {{ "{:,.0f}".format(c.total_revenue|float) }}</td>
           <td>{{ "{:,}".format(c.transactions|int) }}</td>
-          <td style="color:var(--muted);">£{{ "%.2f"|format(c.avg_txn_value|float) }}</td>
+          <td style="color:var(--text-md);">LKR {{ "%.2f"|format(c.avg_txn_value|float) }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="4" style="color:var(--muted);text-align:center;">No data</td></tr>
+        <tr><td colspan="4" style="color:var(--text-lt);text-align:center;padding:24px;">No data available</td></tr>
         {% endfor %}
         </tbody>
       </table>
@@ -90,16 +96,15 @@
 
 {% block scripts %}
 <script>
-const chartDefaults = {
-  color: '#6b7280',
-  borderColor: '#1e2330',
-  font: { family: "'DM Mono', monospace", size: 11 }
-};
-Chart.defaults.color = chartDefaults.color;
-Chart.defaults.borderColor = chartDefaults.borderColor;
-Chart.defaults.font = chartDefaults.font;
+const PRIMARY = '#1a5276';
+const PRIMARY_ALPHA = 'rgba(26,82,118,0.12)';
+const SUCCESS = '#1e8449';
+const SUCCESS_ALPHA = 'rgba(30,132,73,0.12)';
 
-// Category Chart
+Chart.defaults.color = '#8a9ab0';
+Chart.defaults.borderColor = '#dce1e7';
+Chart.defaults.font = { family: "'Lato', sans-serif", size: 12 };
+
 const catData = {{ by_cat | tojson }};
 if (catData.length > 0) {
   new Chart(document.getElementById('catChart'), {
@@ -107,11 +112,11 @@ if (catData.length > 0) {
     data: {
       labels: catData.map(d => d.category),
       datasets: [{
-        label: 'Revenue (£)',
+        label: 'Revenue (LKR)',
         data: catData.map(d => parseFloat(d.total_revenue).toFixed(2)),
-        backgroundColor: 'rgba(0,229,160,0.2)',
-        borderColor: '#00e5a0',
-        borderWidth: 1,
+        backgroundColor: PRIMARY_ALPHA,
+        borderColor: PRIMARY,
+        borderWidth: 1.5,
         borderRadius: 4,
       }]
     },
@@ -119,14 +124,13 @@ if (catData.length > 0) {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { grid: { color: '#1e2330' } },
-        y: { grid: { color: '#1e2330' } }
+        x: { grid: { display: false } },
+        y: { grid: { color: '#f0f3f7' } }
       }
     }
   });
 }
 
-// Daily Revenue Chart
 const dailyData = {{ daily | tojson }};
 if (dailyData.length > 0) {
   new Chart(document.getElementById('dailyChart'), {
@@ -137,10 +141,10 @@ if (dailyData.length > 0) {
         return dt.toLocaleDateString('en-GB', {month:'short', day:'numeric'});
       }),
       datasets: [{
-        label: 'Revenue (£)',
+        label: 'Revenue (LKR)',
         data: dailyData.map(d => parseFloat(d.revenue).toFixed(2)),
-        borderColor: '#0099ff',
-        backgroundColor: 'rgba(0,153,255,0.08)',
+        borderColor: SUCCESS,
+        backgroundColor: SUCCESS_ALPHA,
         borderWidth: 2,
         pointRadius: 2,
         fill: true,
@@ -151,8 +155,8 @@ if (dailyData.length > 0) {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { grid: { color: '#1e2330' } },
-        y: { grid: { color: '#1e2330' } }
+        x: { grid: { display: false } },
+        y: { grid: { color: '#f0f3f7' } }
       }
     }
   });

@@ -3,107 +3,99 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Login — SuperMart</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<title>Sign In — SuperMart</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Merriweather:wght@700&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --bg:#0a0c10;--card:#111318;--border:#1e2330;
-  --accent:#00e5a0;--danger:#ff3b5c;--text:#e8eaf0;--muted:#6b7280;
-}
-body{
-  font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);
-  min-height:100vh;display:flex;align-items:center;justify-content:center;
-  position:relative;overflow:hidden;
-}
-/* Grid background */
-body::before{
-  content:'';position:fixed;inset:0;
-  background-image:
-    linear-gradient(rgba(0,229,160,0.04) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,229,160,0.04) 1px,transparent 1px);
-  background-size:40px 40px;pointer-events:none;
-}
-.glow{
-  position:fixed;top:-200px;left:50%;transform:translateX(-50%);
-  width:600px;height:400px;
-  background:radial-gradient(ellipse,rgba(0,229,160,0.12) 0%,transparent 70%);
-  pointer-events:none;
-}
-.login-box{
-  width:100%;max-width:400px;padding:20px;position:relative;z-index:1;
-}
-.login-card{
-  background:var(--card);border:1px solid var(--border);border-radius:16px;
-  padding:40px;
-}
-.brand{text-align:center;margin-bottom:32px;}
-.brand-name{
-  font-family:'Syne',sans-serif;font-weight:800;font-size:28px;
-  color:var(--accent);letter-spacing:-1px;
-}
-.brand-sub{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
+body{font-family:'Lato',sans-serif;background:#f0f3f7;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.page{display:flex;width:100%;max-width:920px;min-height:520px;box-shadow:0 4px 32px rgba(0,0,0,0.13);border-radius:10px;overflow:hidden;}
 
-.form-group{margin-bottom:18px;}
-.form-label{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;}
-.form-control{
-  width:100%;padding:12px 16px;
-  background:#0a0c10;border:1px solid var(--border);
-  border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:14px;
-  transition:border-color 0.15s;
-}
-.form-control:focus{outline:none;border-color:var(--accent);}
+.left{background:#1a5276;flex:1;padding:48px 40px;display:flex;flex-direction:column;justify-content:space-between;}
+.brand-name{font-family:'Merriweather',serif;font-size:30px;font-weight:700;color:#fff;}
+.brand-name span{color:#f0b429;}
+.brand-sub{font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:1.5px;margin-top:4px;}
+.left-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:20px;}
+.feature{display:flex;align-items:flex-start;gap:14px;}
+.feat-icon{font-size:22px;margin-top:1px;}
+.feat-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:2px;}
+.feat-desc{font-size:12px;color:rgba(255,255,255,0.55);line-height:1.5;}
+.left-footer{font-size:11px;color:rgba(255,255,255,0.3);}
 
-.btn-login{
-  width:100%;padding:13px;background:var(--accent);color:#000;
-  border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;
-  font-size:14px;cursor:pointer;transition:background 0.15s;margin-top:8px;
-  letter-spacing:0.5px;
-}
-.btn-login:hover{background:#00cc8a;}
+.right{background:#fff;width:380px;flex-shrink:0;padding:44px 40px;display:flex;flex-direction:column;justify-content:center;}
+.login-title{font-family:'Merriweather',serif;font-size:20px;font-weight:700;color:#1c2833;margin-bottom:4px;}
+.login-sub{font-size:13px;color:#8a9ab0;margin-bottom:28px;}
 
-.flash{
-  padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:16px;
-  background:rgba(255,59,92,0.1);border:1px solid rgba(255,59,92,0.3);color:var(--danger);
-  display:flex;align-items:center;gap:8px;
-}
-.creds{
-  margin-top:24px;padding:16px;background:rgba(0,229,160,0.05);
-  border:1px solid rgba(0,229,160,0.15);border-radius:8px;font-size:11px;
-}
-.creds-title{color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-size:9px;}
-.cred-row{display:flex;justify-content:space-between;padding:3px 0;color:var(--muted);}
-.cred-row span:first-child{color:var(--text);}
-.cred-row span:last-child{color:var(--accent);}
+.form-group{margin-bottom:16px;}
+.form-label{display:block;font-size:12px;font-weight:700;color:#4a5568;margin-bottom:5px;}
+.form-control{width:100%;padding:9px 13px;border:1px solid #b2bec3;border-radius:6px;font-family:'Lato',sans-serif;font-size:14px;color:#1c2833;transition:border-color 0.15s,box-shadow 0.15s;}
+.form-control:focus{outline:none;border-color:#1a5276;box-shadow:0 0 0 3px rgba(26,82,118,0.1);}
+.btn-login{width:100%;padding:11px;background:#1a5276;color:#fff;border:none;border-radius:6px;font-family:'Lato',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:background 0.15s;margin-top:6px;}
+.btn-login:hover{background:#154360;}
+
+.flash{padding:9px 13px;border-radius:6px;font-size:13px;margin-bottom:16px;background:#fadbd8;border:1px solid #f1948a;color:#c0392b;display:flex;align-items:center;gap:8px;}
+
+.creds{margin-top:24px;padding:14px 16px;background:#f8f9fa;border:1px solid #dce1e7;border-radius:6px;}
+.creds-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#8a9ab0;margin-bottom:8px;}
+.cred-row{display:flex;justify-content:space-between;padding:3px 0;font-size:12.5px;}
+.cred-row span:first-child{color:#1c2833;font-weight:700;}
+.cred-row span:last-child{color:#1a5276;font-family:monospace;}
 </style>
 </head>
 <body>
-<div class="glow"></div>
-<div class="login-box">
-  <div class="login-card">
-    <div class="brand">
-      <div class="brand-name">SuperMart</div>
+<div class="page">
+  <div class="left">
+    <div>
+      <div class="brand-name">Super<span>Mart</span></div>
       <div class="brand-sub">Secure Management System</div>
     </div>
+    <div class="left-body">
+      <div class="feature">
+        <div class="feat-icon">🔒</div>
+        <div>
+          <div class="feat-title">Role-Based Access Control</div>
+          <div class="feat-desc">Three-tier permission system keeping data secure across admin, manager and cashier roles.</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feat-icon">⚡</div>
+        <div>
+          <div class="feat-title">High-Performance Processing</div>
+          <div class="feat-desc">Multiprocessing and threaded transaction engines for peak-hour reliability.</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feat-icon">📊</div>
+        <div>
+          <div class="feat-title">Real-Time Analytics</div>
+          <div class="feat-desc">Vectorized NumPy computations deliver instant reports on sales and inventory.</div>
+        </div>
+      </div>
+    </div>
+    <div class="left-footer">SuperMart v1.0 &mdash; BSc Computer Security Project</div>
+  </div>
+
+  <div class="right">
+    <div class="login-title">Welcome back</div>
+    <div class="login-sub">Sign in to your account to continue</div>
 
     {% for cat, msg in get_flashed_messages(with_categories=true) %}
-    <div class="flash">✘ {{ msg }}</div>
+    <div class="flash">✖ {{ msg }}</div>
     {% endfor %}
 
     <form method="POST" action="{{ url_for('login_page') }}">
       <div class="form-group">
         <label class="form-label">Username</label>
-        <input class="form-control" type="text" name="username" placeholder="Enter username" autofocus required/>
+        <input class="form-control" type="text" name="username" placeholder="Enter your username" autofocus required/>
       </div>
       <div class="form-group">
         <label class="form-label">Password</label>
-        <input class="form-control" type="password" name="password" placeholder="Enter password" required/>
+        <input class="form-control" type="password" name="password" placeholder="Enter your password" required/>
       </div>
-      <button class="btn-login" type="submit">Sign In →</button>
+      <button class="btn-login" type="submit">Sign In</button>
     </form>
 
     <div class="creds">
-      <div class="creds-title">Default Credentials</div>
+      <div class="creds-title">Demo Credentials</div>
       <div class="cred-row"><span>admin</span><span>Admin@123</span></div>
       <div class="cred-row"><span>manager</span><span>Manager@123</span></div>
       <div class="cred-row"><span>cashier1</span><span>Cashier@123</span></div>

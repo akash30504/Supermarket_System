@@ -166,7 +166,7 @@ def inventory_menu():
             try:
                 name     = prompt("Product name")
                 category = prompt("Category")
-                price    = prompt_float("Unit price (£)")
+                price    = prompt_float("Unit price (LKR )")
                 qty      = prompt_int("Initial stock quantity")
                 reorder  = prompt_int("Reorder level", 10)
                 pid      = add_product(name, category, price, qty, reorder)
@@ -253,7 +253,7 @@ def _print_products(prods):
     print("  " + "─"*70)
     for p in prods[:100]:  # Cap display at 100
         print(f"  {p['product_id']:>5}  {p['product_name']:<30}  "
-              f"{p['category']:<15}  £{p['unit_price']:>7.2f}  {p['stock_qty']:>6}")
+              f"{p['category']:<15}  LKR {p['unit_price']:>7.2f}  {p['stock_qty']:>6}")
     if len(prods) > 100:
         info(f"Showing 100 of {len(prods)} results.")
 
@@ -282,8 +282,8 @@ def transaction_menu():
                 print(f"\n  TxnID:       {result['txn_id']}")
                 print(f"  Product ID:  {result['product_id']}")
                 print(f"  Quantity:    {result['quantity']}")
-                print(f"  Unit Price:  £{result['unit_price']:.2f}")
-                print(f"  Total:       £{result['total_value']:.2f}")
+                print(f"  Unit Price:  LKR {result['unit_price']:.2f}")
+                print(f"  Total:       LKR {result['total_value']:.2f}")
             except (ValueError, PermissionError) as e:
                 error(str(e))
             pause()
@@ -328,8 +328,8 @@ def transaction_menu():
                 hr()
                 for t in txns:
                     print(f"  {t['txn_id']:>6}  {t['product_name'][:22]:<22}  "
-                          f"{t['quantity']:>4}  £{t['unit_price']:>7.2f}  "
-                          f"£{t['total_value']:>8.2f}  {str(t['txn_time'])[:19]}")
+                          f"{t['quantity']:>4}  LKR {t['unit_price']:>7.2f}  "
+                          f"LKR {t['total_value']:>8.2f}  {str(t['txn_time'])[:19]}")
             else:
                 info("No transactions recorded yet.")
             pause()
