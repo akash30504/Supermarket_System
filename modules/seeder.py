@@ -124,8 +124,8 @@ def seed_transactions(target: int = 100_000, batch_size: int = 5000) -> int:
     raw_conn.execute("PRAGMA synchronous=NORMAL")
 
     import datetime
-    base_time = datetime.datetime(2026, 2, 27, 8, 0, 0)
-    seconds_per_txn = (30 * 24 * 3600) / target  # spread over 30 days (Feb 27 – Mar 29 2026)
+    base_time = datetime.datetime(2026, 2, 1, 8, 0, 0)
+seconds_per_txn = (28 * 24 * 3600) / target  # spread across all of February 2026
 
     while inserted < needed:
         batch = []
