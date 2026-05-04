@@ -219,7 +219,7 @@ def process_txn():
         pid = int(request.form["product_id"])
         qty = int(request.form["quantity"])
         result = process_transaction(pid, qty)
-        flash(f"Transaction #{result['txn_id']} completed — £{result['total_value']:.2f}", "success")
+        flash(f"Transaction #{result['txn_id']} completed — LKR {result['total_value']:.2f}", "success")
     except Exception as e:
         flash(str(e), "error")
     return redirect(url_for("transactions"))
