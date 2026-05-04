@@ -3,38 +3,45 @@
 {% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
+<div class="page-header">
+  <div>
+    <h1>Overview</h1>
+    <p>Welcome back, {{ session.username }}. Here's what's happening today.</p>
+  </div>
+</div>
+
 <!-- Stat Cards -->
 <div class="stats-grid">
-  <div class="stat-card" style="--accent-color:#00e5a0;">
+  <div class="stat-card" style="--stat-color:#1a5276;">
     <div class="stat-label">Total Products</div>
     <div class="stat-value">{{ inv.get('total_products',0)|int }}</div>
     <div class="stat-sub">{{ inv.get('out_of_stock',0)|int }} out of stock</div>
   </div>
-  <div class="stat-card" style="--accent-color:#0099ff;">
+  <div class="stat-card" style="--stat-color:#1e8449;">
     <div class="stat-label">Total Units</div>
     <div class="stat-value">{{ "{:,}".format(inv.get('total_units',0)|int) }}</div>
     <div class="stat-sub">across all products</div>
   </div>
-  <div class="stat-card" style="--accent-color:#ff6b35;">
+  <div class="stat-card" style="--stat-color:#d68910;">
     <div class="stat-label">Stock Value</div>
-    <div class="stat-value">${{ "{:,.0f}".format(inv.get('total_stock_value',0)|float) }}</div>
+    <div class="stat-value" style="font-size:20px;">LKR {{ "{:,.0f}".format(inv.get('total_stock_value',0)|float) }}</div>
     <div class="stat-sub">estimated retail value</div>
   </div>
-  <div class="stat-card" style="--accent-color:#ff3b5c;">
+  <div class="stat-card" style="--stat-color:#c0392b;">
     <div class="stat-label">Low Stock Alerts</div>
     <div class="stat-value">{{ inv.get('low_stock_count',0)|int }}</div>
-    <div class="stat-sub">need restocking</div>
+    <div class="stat-sub">items need restocking</div>
   </div>
   {% if sales %}
-  <div class="stat-card" style="--accent-color:#a78bfa;">
+  <div class="stat-card" style="--stat-color:#7d3c98;">
     <div class="stat-label">Total Revenue</div>
-    <div class="stat-value">£{{ "{:,.0f}".format(sales.get('total_revenue',0)|float) }}</div>
+    <div class="stat-value" style="font-size:20px;">LKR {{ "{:,.0f}".format(sales.get('total_revenue',0)|float) }}</div>
     <div class="stat-sub">all transactions</div>
   </div>
-  <div class="stat-card" style="--accent-color:#34d399;">
+  <div class="stat-card" style="--stat-color:#1f618d;">
     <div class="stat-label">Transactions</div>
     <div class="stat-value">{{ "{:,}".format(sales.get('total_transactions',0)|int) }}</div>
-    <div class="stat-sub">avg £{{ "%.2f"|format(sales.get('avg_transaction_value',0)|float) }} each</div>
+    <div class="stat-sub">avg LKR {{ "%.2f"|format(sales.get('avg_transaction_value',0)|float) }} each</div>
   </div>
   {% endif %}
 </div>
@@ -55,17 +62,17 @@
         <tbody>
         {% for t in recent_txns %}
         <tr>
-          <td>#{{ t.txn_id }}</td>
-          <td>{{ t.product_name[:22] }}</td>
+          <td style="color:var(--text-lt);font-size:12px;">#{{ t.txn_id }}</td>
+          <td>{{ t.product_name[:24] }}</td>
           <td>{{ t.quantity }}</td>
-          <td>£{{ "%.2f"|format(t.total_value|float) }}</td>
-          <td style="color:var(--muted);font-size:11px;">{{ t.txn_time|string|truncate(16,true,'') }}</td>
+          <td class="amount">LKR {{ "%.2f"|format(t.total_value|float) }}</td>
+          <td style="color:var(--text-lt);font-size:12px;">{{ t.txn_time|string|truncate(16,true,'') }}</td>
         </tr>
         {% endfor %}
         </tbody>
       </table>
       {% else %}
-      <p style="color:var(--muted);font-size:13px;padding:16px 0;">No transactions yet. Seed demo data to get started.</p>
+      <div style="padding:24px 20px;color:var(--text-lt);font-size:13px;">No transactions yet. Seed demo data to get started.</div>
       {% endif %}
     </div>
   </div>
@@ -83,14 +90,14 @@
         <tbody>
         {% for p in low_stock %}
         <tr>
-          <td>{{ p.product_name[:22] }}</td>
-          <td>{{ p.stock_qty }}</td>
-          <td>{{ p.reorder_level }}</td>
+          <td>{{ p.product_name[:24] }}</td>
+          <td><strong>{{ p.stock_qty }}</strong></td>
+          <td style="color:var(--text-lt);">{{ p.reorder_level }}</td>
           <td>
             {% if p.stock_qty == 0 %}
-            <span class="badge badge-red">OUT</span>
+            <span class="badge badge-red">Out of Stock</span>
             {% else %}
-            <span class="badge badge-orange">LOW</span>
+            <span class="badge badge-orange">Low Stock</span>
             {% endif %}
           </td>
         </tr>
@@ -99,7 +106,9 @@
       </table>
     </div>
     {% else %}
-    <p style="color:var(--accent);font-size:13px;padding:8px 0;">✔ All products adequately stocked.</p>
+    <div style="padding:20px;color:var(--success);font-size:13px;font-weight:700;">
+      ✔ All products are adequately stocked.
+    </div>
     {% endif %}
   </div>
 </div>
