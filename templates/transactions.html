@@ -3,64 +3,79 @@
 {% block page_title %}Transaction Processing{% endblock %}
 
 {% block content %}
+<div class="page-header">
+  <div>
+    <h1>Transactions</h1>
+    <p>Process sales and view transaction history</p>
+  </div>
+</div>
+
 <div class="grid-2" style="margin-bottom:20px;">
   <!-- Single Transaction -->
   <div class="card">
-    <div class="card-header"><span class="card-title">Process Transaction</span></div>
-    <form method="POST" action="{{ url_for('process_txn') }}">
-      <div class="form-group">
-        <label class="form-label">Product</label>
-        <select class="form-control" name="product_id" required>
-          <option value="">— Select product —</option>
-          {% for p in products %}
-          <option value="{{ p.product_id }}">{{ p.product_name }} (£{{ "%.2f"|format(p.unit_price|float) }}) — {{ p.stock_qty }} in stock</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Quantity</label>
-        <input class="form-control" type="number" name="quantity" min="1" value="1" required/>
-      </div>
-      <button class="btn btn-primary" type="submit">Process →</button>
-    </form>
+    <div class="card-header">
+      <span class="card-title">Process Sale</span>
+      <span class="badge badge-green">Single</span>
+    </div>
+    <div class="card-pad">
+      <form method="POST" action="{{ url_for('process_txn') }}">
+        <div class="form-group">
+          <label class="form-label">Product</label>
+          <select class="form-control" name="product_id" required>
+            <option value="">— Select a product —</option>
+            {% for p in products %}
+            <option value="{{ p.product_id }}">{{ p.product_name }} — LKR {{ "%.2f"|format(p.unit_price|float) }} ({{ p.stock_qty }} in stock)</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Quantity</label>
+          <input class="form-control" type="number" name="quantity" min="1" value="1" required/>
+        </div>
+        <button class="btn btn-primary" type="submit">Process Transaction</button>
+      </form>
+    </div>
   </div>
 
   <!-- Batch Processing -->
   {% if session.role in ['admin','manager'] %}
   <div class="card">
-    <div class="card-header"><span class="card-title">Batch Processing</span>
-      <span class="badge badge-blue">HPC</span>
+    <div class="card-header">
+      <span class="card-title">Batch Processing</span>
+      <span class="badge badge-gold">HPC Mode</span>
     </div>
-    <form method="POST" action="{{ url_for('batch_txn') }}">
-      <div class="form-group">
-        <label class="form-label">Product</label>
-        <select class="form-control" name="product_id" required>
-          <option value="">— Select product —</option>
-          {% for p in products %}
-          <option value="{{ p.product_id }}">{{ p.product_name }} (stock: {{ p.stock_qty }})</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="grid-2">
+    <div class="card-pad">
+      <form method="POST" action="{{ url_for('batch_txn') }}">
         <div class="form-group">
-          <label class="form-label">Qty per Transaction</label>
-          <input class="form-control" type="number" name="quantity" min="1" value="1" required/>
+          <label class="form-label">Product</label>
+          <select class="form-control" name="product_id" required>
+            <option value="">— Select a product —</option>
+            {% for p in products %}
+            <option value="{{ p.product_id }}">{{ p.product_name }} ({{ p.stock_qty }} in stock)</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Qty per Transaction</label>
+            <input class="form-control" type="number" name="quantity" min="1" value="1" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Number of Transactions</label>
+            <input class="form-control" type="number" name="count" min="1" max="500" value="20" required/>
+          </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Number of Transactions</label>
-          <input class="form-control" type="number" name="count" min="1" max="500" value="20" required/>
+          <label class="form-label">Processing Mode</label>
+          <select class="form-control" name="mode">
+            <option value="sequential">Sequential (baseline)</option>
+            <option value="threaded">Threaded (4 workers)</option>
+            <option value="multiprocessing">Multiprocessing (2 cores)</option>
+          </select>
         </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Processing Mode</label>
-        <select class="form-control" name="mode">
-          <option value="sequential">Sequential (baseline)</option>
-          <option value="threaded">Threaded (4 workers)</option>
-          <option value="multiprocessing">Multiprocessing (2 cores)</option>
-        </select>
-      </div>
-      <button class="btn btn-primary" type="submit">Run Batch →</button>
-    </form>
+        <button class="btn btn-primary" type="submit">Run Batch</button>
+      </form>
+    </div>
   </div>
   {% endif %}
 </div>
@@ -68,26 +83,27 @@
 <!-- Transaction History -->
 <div class="card">
   <div class="card-header">
-    <span class="card-title">Recent Transactions (last 50)</span>
+    <span class="card-title">Recent Transactions</span>
+    <span style="font-size:12px;color:var(--text-lt);">Last 50 records</span>
   </div>
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th>TxnID</th><th>Product</th><th>Qty</th>
-        <th>Unit Price</th><th>Total</th><th>Time</th>
+        <th>Txn ID</th><th>Product</th><th>Qty</th>
+        <th>Unit Price</th><th>Total</th><th>Date & Time</th>
       </tr></thead>
       <tbody>
       {% for t in transactions %}
       <tr>
-        <td style="color:var(--muted);">#{{ t.txn_id }}</td>
+        <td style="color:var(--text-lt);font-size:12px;">#{{ t.txn_id }}</td>
         <td>{{ t.product_name }}</td>
         <td>{{ t.quantity }}</td>
-        <td>£{{ "%.2f"|format(t.unit_price|float) }}</td>
-        <td style="color:var(--accent);">£{{ "%.2f"|format(t.total_value|float) }}</td>
-        <td style="color:var(--muted);font-size:11px;">{{ t.txn_time|string|truncate(19,true,'') }}</td>
+        <td style="color:var(--text-md);">LKR {{ "%.2f"|format(t.unit_price|float) }}</td>
+        <td class="amount">LKR {{ "%.2f"|format(t.total_value|float) }}</td>
+        <td style="color:var(--text-lt);font-size:12px;">{{ t.txn_time|string|truncate(19,true,'') }}</td>
       </tr>
       {% else %}
-      <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">No transactions yet.</td></tr>
+      <tr><td colspan="6" style="text-align:center;color:var(--text-lt);padding:32px;">No transactions yet.</td></tr>
       {% endfor %}
       </tbody>
     </table>
