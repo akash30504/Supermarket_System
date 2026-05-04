@@ -12,7 +12,7 @@ echo.
 echo  Starting server, please wait...
 echo.
 
-cd /d "%USERPROFILE%\Desktop\supermarket_system_web\supermarket_system"
+cd /d "%USERPROFILE%\C:\Uni\Year 03\Supermarket_System"
 
 if not exist "app.py" (
     echo  ERROR: Could not find the project folder.
