@@ -126,7 +126,7 @@ def seed_transactions(target: int = 100_000, batch_size: int = 5000) -> int:
 
     import datetime
     base_time = datetime.datetime(2026, 2, 1, 8, 0, 0)
-seconds_per_txn = (28 * 24 * 3600) / target  # spread across all of February 2026
+    seconds_per_txn = (28 * 24 * 3600) / target  # spread across all of February 2026
 
     while inserted < needed:
         batch = []
