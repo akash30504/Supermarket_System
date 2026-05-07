@@ -1,0 +1,2 @@
+[2026-05-07 15:58:09] LOW STOCK: Chicken Breast (ID:99) — 3 units left | Triggered by: Manual check
+[2026-05-07 15:59:30] LOW STOCK: Eclair #10 (ID:94) — 22 units left | Triggered by: Transaction #100298 (1 units sold)
