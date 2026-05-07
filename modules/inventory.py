@@ -151,10 +151,12 @@ def adjust_stock(product_id: int, delta: int, reason: str = "manual adjustment")
         conn.close()
 
 
-def _deduct_stock_unsafe(conn, product_id: int, quantity: int):
+def _deduct_stock_unsafe(conn, product_id: int, quantity: int,
+                         txn_id: int = None):
     """
     Internal: deduct stock within an existing connection/transaction.
     Raises ValueError if insufficient stock.
+    Sends email alert if stock falls to or below 50 units.
     """
     row = conn.execute(
         "SELECT stock_qty FROM products WHERE product_id=?", (product_id,)
@@ -170,27 +172,31 @@ def _deduct_stock_unsafe(conn, product_id: int, quantity: int):
         "UPDATE products SET stock_qty = stock_qty - ? WHERE product_id=?",
         (quantity, product_id)
     )
-    # Check if stock has dropped to or below reorder level after deduction
+    # Check if stock dropped to or below 50 units after deduction
     updated = conn.execute(
         "SELECT product_name, stock_qty, reorder_level FROM products WHERE product_id=?",
         (product_id,)
     ).fetchone()
-    if updated and updated["stock_qty"] <= updated["reorder_level"]:
-        send_low_stock_email(updated["product_name"], updated["stock_qty"],
-                             updated["reorder_level"], product_id)
+    if updated and updated["stock_qty"] <= 50:
+        send_low_stock_email(
+            product_name  = updated["product_name"],
+            stock_qty     = updated["stock_qty"],
+            reorder_level = updated["reorder_level"],
+            product_id    = product_id,
+            txn_id        = txn_id,
+            quantity_sold = quantity,
+        )
+
+LOW_STOCK_THRESHOLD = 50   # alert when stock falls at or below this number
 
 def get_low_stock_products(threshold: int = None) -> list:
-    """Return products at or below their reorder level (or custom threshold)."""
+    """Return products with stock at or below threshold (default: 50 units)."""
     conn = get_connection()
-    if threshold is not None:
-        rows = conn.execute(
-            "SELECT * FROM products WHERE stock_qty <= ? ORDER BY stock_qty",
-            (threshold,)
-        ).fetchall()
-    else:
-        rows = conn.execute(
-            "SELECT * FROM products WHERE stock_qty <= reorder_level ORDER BY stock_qty"
-        ).fetchall()
+    limit = threshold if threshold is not None else LOW_STOCK_THRESHOLD
+    rows = conn.execute(
+        "SELECT * FROM products WHERE stock_qty <= ? ORDER BY stock_qty",
+        (limit,)
+    ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
 
@@ -204,7 +210,7 @@ def get_inventory_summary() -> dict:
             SUM(stock_qty)                    AS total_units,
             SUM(stock_qty * unit_price)       AS total_stock_value,
             COUNT(CASE WHEN stock_qty=0 THEN 1 END) AS out_of_stock,
-            COUNT(CASE WHEN stock_qty <= reorder_level THEN 1 END) AS low_stock_count
+            COUNT(CASE WHEN stock_qty <= 50 THEN 1 END) AS low_stock_count
         FROM products
     """).fetchone()
     conn.close()
