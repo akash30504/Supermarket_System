@@ -45,16 +45,16 @@ def process_transaction(product_id: int, quantity: int, cashier_id: int = None) 
             if prod is None:
                 raise ValueError(f"Product {product_id} not found.")
 
-            # Deduct stock (raises if insufficient)
-            _deduct_stock_unsafe(conn, product_id, quantity)
-
-            # Insert transaction record
+            # Insert transaction record first to get txn_id
             cursor = conn.execute(
                 "INSERT INTO transactions (product_id, cashier_id, quantity, unit_price) "
                 "VALUES (?,?,?,?)",
                 (product_id, c_id, quantity, prod["unit_price"])
             )
             txn_id = cursor.lastrowid
+
+            # Deduct stock and trigger email alert if stock <= 50
+            _deduct_stock_unsafe(conn, product_id, quantity, txn_id=txn_id)
             _audit(conn, c_id, "TRANSACTION",
                    f"TxnID={txn_id} ProductID={product_id} Qty={quantity}")
             conn.commit()
