@@ -276,6 +276,9 @@ def inventory_analytics():
     try:
         inv = inventory_report().to_dict(orient="records")
         low = get_low_stock_products()
+        # Send summary report email with ALL low stock products
+        if low:
+            send_low_stock_report_email(low)
     except Exception as e:
         flash(str(e), "error")
         inv = []; low = []
