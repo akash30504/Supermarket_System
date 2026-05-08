@@ -7,7 +7,7 @@ Handles CRUD operations for products, stock adjustments, and low-stock alerts.
 
 from modules.database import get_connection
 from modules.auth import require_permission, get_session, _audit
-from modules.alerts import send_low_stock_email
+from modules.alerts import send_low_stock_email, send_low_stock_report_email
 
 # ── Products ─────────────────────────────────────────────────────────────────
 
@@ -172,7 +172,7 @@ def _deduct_stock_unsafe(conn, product_id: int, quantity: int,
         "UPDATE products SET stock_qty = stock_qty - ? WHERE product_id=?",
         (quantity, product_id)
     )
-    # Check if stock dropped to or below 50 units after deduction
+    # Send email alert for EVERY transaction where stock is at or below 50
     updated = conn.execute(
         "SELECT product_name, stock_qty, reorder_level FROM products WHERE product_id=?",
         (product_id,)
