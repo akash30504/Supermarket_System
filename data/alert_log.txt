@@ -1,2 +1,4 @@
 [2026-05-07 15:58:09] LOW STOCK: Chicken Breast (ID:99) — 3 units left | Triggered by: Manual check
 [2026-05-07 15:59:30] LOW STOCK: Eclair #10 (ID:94) — 22 units left | Triggered by: Transaction #100298 (1 units sold)
+[2026-05-08 12:46:36] LOW STOCK: Ciabatta #3 (ID:27) — 22 units left | Triggered by: Transaction #100300 (1 units sold)
+[2026-05-08 13:08:38] LOW STOCK: Eclair #10 (ID:94) — 11 units left | Triggered by: Transaction #100301 (11 units sold)
