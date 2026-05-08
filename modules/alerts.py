@@ -2,13 +2,12 @@
 alerts.py
 ---------
 Sends email alerts for low stock events.
-Uses Gmail SMTP with App Password authentication.
-Falls back to console alert if network blocks SMTP.
+Uses Gmail SMTP with TLS (port 587) — works on all networks.
 """
 
 import smtplib
 import datetime
-import os
+import socket
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -17,83 +16,44 @@ EMAIL_ENABLED = False
 EMAIL_SENDER = EMAIL_PASSWORD = EMAIL_RECEIVER = ""
 
 try:
-    from email_config import EMAIL_SENDER, EMAIL_PASSWORD, EMAIL_RECEIVER
-    EMAIL_ENABLED = True
-except ImportError:
-    try:
-        import sys
-        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'data'))
-        from email_config import EMAIL_SENDER, EMAIL_PASSWORD, EMAIL_RECEIVER
-        EMAIL_ENABLED = True
-    except ImportError:
-        pass
+    # Try root folder first (correct location)
+    import importlib.util, os, sys
 
-# ── Alert log file (always written, even if email fails) ──────────────────────
-ALERT_LOG = os.path.join(os.path.dirname(__file__), '..', 'data', 'alert_log.txt')
+    # Build absolute path to email_config.py in project root
+    _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    _cfg  = os.path.join(_root, "email_config.py")
 
-
-def _write_alert_log(product_name, stock_qty, reorder_level,
-                     product_id, txn_id, quantity_sold):
-    """Always write alert to a local log file — proof for viva even if email blocked."""
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    txn_info = f"Transaction #{txn_id} ({quantity_sold} units sold)" if txn_id else "Manual check"
-    line = (f"[{now}] LOW STOCK: {product_name} (ID:{product_id}) — "
-            f"{stock_qty} units left | Triggered by: {txn_info}\n")
-    try:
-        with open(ALERT_LOG, 'a', encoding='utf-8') as f:
-            f.write(line)
-        print(f"[Alert] ✔ Written to alert_log.txt: {product_name} ({stock_qty} units left)")
-    except Exception as e:
-        print(f"[Alert] Could not write log: {e}")
-
-
-def _try_send_smtp(msg, sender, password, receiver):
-    """Try SMTP_SSL port 465 first, then STARTTLS port 587."""
-    # Attempt 1 — SMTP_SSL port 465
-    try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=8) as server:
-            server.login(sender, password)
-            server.sendmail(sender, receiver, msg.as_string())
-        return True, None
-    except Exception as e1:
-        pass
-
-    # Attempt 2 — STARTTLS port 587
-    try:
-        with smtplib.SMTP("smtp.gmail.com", 587, timeout=8) as server:
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(sender, password)
-            server.sendmail(sender, receiver, msg.as_string())
-        return True, None
-    except Exception as e2:
-        return False, str(e2)
+    if os.path.exists(_cfg):
+        spec   = importlib.util.spec_from_file_location("email_config", _cfg)
+        _mod   = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(_mod)
+        EMAIL_SENDER   = _mod.EMAIL_SENDER
+        EMAIL_PASSWORD = _mod.EMAIL_PASSWORD
+        EMAIL_RECEIVER = _mod.EMAIL_RECEIVER
+        EMAIL_ENABLED  = True
+        print(f"[Alert] Email configured for: {EMAIL_SENDER}")
+    else:
+        print(f"[Alert] email_config.py not found at: {_cfg}")
+except Exception as e:
+    print(f"[Alert] Could not load email_config: {e}")
 
 
 def send_low_stock_email(product_name: str, stock_qty: int,
                           reorder_level: int, product_id: int,
                           txn_id: int = None, quantity_sold: int = None):
     """
-    Send an email alert when stock falls at or below 50 units.
-    Always writes to alert_log.txt (works even if network blocks email).
-    Tries two SMTP ports (465 and 587) before giving up.
+    Send a low-stock email alert via Gmail SMTP (TLS port 587).
+    Triggered automatically when stock falls to or below 50 units.
     """
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    if not EMAIL_ENABLED:
+        print(f"[Alert] Email not configured. Low stock: {product_name} ({stock_qty} left)")
+        return
+
+    now      = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    subject  = f"LOW STOCK ALERT — {product_name} ({stock_qty} units left)"
     txn_line = ""
     if txn_id and quantity_sold:
         txn_line = f"Triggered by  : Transaction #{txn_id} — {quantity_sold} unit(s) sold\n"
-
-    # Always write to local log file first
-    _write_alert_log(product_name, stock_qty, reorder_level,
-                     product_id, txn_id, quantity_sold)
-
-    if not EMAIL_ENABLED:
-        print(f"[Alert] Email not configured — check email_config.py exists in project root.")
-        return
-
-    subject = f"LOW STOCK ALERT — {product_name} ({stock_qty} units left)"
 
     body = f"""SuperMart Management System — Low Stock Alert
 ==============================================
@@ -102,14 +62,12 @@ Product       : {product_name}
 Product ID    : {product_id}
 Stock Left    : {stock_qty} units
 Reorder Level : {reorder_level} units
-Alert Trigger : Stock has reached or fallen below 50 units
+Alert Trigger : Stock reached or fell below 50 units
 {txn_line}
 ACTION REQUIRED
 ---------------
-This product needs restocking. Please arrange a purchase order
-or stock adjustment as soon as possible.
-
-To update stock: Login to SuperMart → Products → find product → click ± button
+This product needs restocking urgently.
+Login to SuperMart → Products → find product → click ± to adjust stock.
 
 — SuperMart Automated Alert System
 """
@@ -120,11 +78,98 @@ To update stock: Login to SuperMart → Products → find product → click ± b
     msg["Subject"] = subject
     msg.attach(MIMEText(body, "plain"))
 
-    success, error = _try_send_smtp(msg, EMAIL_SENDER, EMAIL_PASSWORD, EMAIL_RECEIVER)
+    # Force IPv4 to avoid IPv6 issues on some networks
+    _orig_getaddrinfo = socket.getaddrinfo
+    def _ipv4_only(host, port, family=0, type=0, proto=0, flags=0):
+        return _orig_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
 
-    if success:
-        print(f"[Alert] ✔ Email sent successfully: {product_name} ({stock_qty} units left).")
-    else:
-        print(f"[Alert] ✖ Email blocked by network (SMTP ports 465/587 unavailable).")
-        print(f"[Alert]   Alert saved to data/alert_log.txt instead.")
-        print(f"[Alert]   Error: {error}")
+    try:
+        # Use TLS port 587 — works on all networks including university WiFi
+        socket.getaddrinfo = _ipv4_only          # force IPv4
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+            server.sendmail(EMAIL_SENDER, EMAIL_RECEIVER, msg.as_string())
+        print(f"[Alert] Email sent: {product_name} ({stock_qty} units left)")
+    except smtplib.SMTPAuthenticationError:
+        print(f"[Alert] Authentication failed — check App Password in email_config.py")
+        print(f"[Alert] Get a new App Password: myaccount.google.com → Security → App passwords")
+    except Exception as e:
+        print(f"[Alert] Email failed: {e}")
+    finally:
+        socket.getaddrinfo = _orig_getaddrinfo   # restore original
+
+
+def send_low_stock_report_email(low_stock_products: list):
+    """
+    Send a summary report email listing ALL products with stock <= 50.
+    Triggered when admin/manager clicks the Full Report button.
+    """
+    if not EMAIL_ENABLED:
+        print(f"[Alert] Email not configured. {len(low_stock_products)} low stock products found.")
+        return
+
+    if not low_stock_products:
+        print("[Alert] No low stock products found — report email not sent.")
+        return
+
+    now     = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    count   = len(low_stock_products)
+    subject = f"LOW STOCK REPORT — {count} products need restocking ({now[:10]})"
+
+    # Build product rows for the report
+    rows = ""
+    for i, p in enumerate(low_stock_products, 1):
+        status = "OUT OF STOCK" if p.get("stock_qty", 0) == 0 else "LOW STOCK"
+        rows += (
+            f"  {i:>3}. {p.get('product_name','Unknown'):<28} "
+            f"Stock: {p.get('stock_qty',0):>4}  "
+            f"Reorder: {p.get('reorder_level',0):>4}  "
+            f"[{status}]\n"
+        )
+
+    body = f"""SuperMart Management System — Low Stock Report
+================================================
+Generated   : {now}
+Report Type : Full Low Stock Summary (stock <= 50 units)
+Total Items : {count} products need attention
+
+PRODUCTS REQUIRING RESTOCKING
+------------------------------
+{rows}
+ACTION REQUIRED
+---------------
+Please arrange purchase orders or stock adjustments for the
+items listed above. Login to SuperMart → Products → find
+each product → click the ± button to adjust stock.
+
+— SuperMart Automated Report System
+"""
+
+    msg = MIMEMultipart()
+    msg["From"]    = EMAIL_SENDER
+    msg["To"]      = EMAIL_RECEIVER
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "plain"))
+
+    _orig_getaddrinfo = socket.getaddrinfo
+    def _ipv4_only(host, port, family=0, type=0, proto=0, flags=0):
+        return _orig_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
+
+    try:
+        socket.getaddrinfo = _ipv4_only
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+            server.sendmail(EMAIL_SENDER, EMAIL_RECEIVER, msg.as_string())
+        print(f"[Alert] Report email sent: {count} low stock products listed.")
+    except smtplib.SMTPAuthenticationError:
+        print("[Alert] Authentication failed — check App Password in email_config.py")
+    except Exception as e:
+        print(f"[Alert] Report email failed: {e}")
+    finally:
+        socket.getaddrinfo = _orig_getaddrinfo
