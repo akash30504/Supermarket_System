@@ -4,23 +4,19 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Sign In — SuperMart</title>
-<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Merriweather:wght@700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Merriweather:wght@400;700&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Lato',sans-serif;background:#f0f3f7;min-height:100vh;display:flex;align-items:center;justify-content:center;}
 .page{display:flex;width:100%;max-width:920px;min-height:520px;box-shadow:0 4px 32px rgba(0,0,0,0.13);border-radius:10px;overflow:hidden;}
 
-.left{background:#1a5276;flex:1;padding:48px 40px;display:flex;flex-direction:column;justify-content:space-between;}
-.brand-name{font-family:'Merriweather',serif;font-size:30px;font-weight:700;color:#fff;}
+/* LEFT PANEL — centered brand name only */
+.left{background:#1a5276;flex:1;padding:48px 40px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.brand-name{font-family:'Merriweather',serif;font-size:44px;font-weight:700;color:#fff;text-align:center;line-height:1.2;}
 .brand-name span{color:#f0b429;}
-.brand-sub{font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:1.5px;margin-top:4px;}
-.left-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:20px;}
-.feature{display:flex;align-items:flex-start;gap:14px;}
-.feat-icon{font-size:22px;margin-top:1px;}
-.feat-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:2px;}
-.feat-desc{font-size:12px;color:rgba(255,255,255,0.55);line-height:1.5;}
-.left-footer{font-size:11px;color:rgba(255,255,255,0.3);}
+.brand-sub{font-size:13px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:2px;margin-top:12px;text-align:center;}
 
+/* RIGHT PANEL */
 .right{background:#fff;width:380px;flex-shrink:0;padding:44px 40px;display:flex;flex-direction:column;justify-content:center;}
 .login-title{font-family:'Merriweather',serif;font-size:20px;font-weight:700;color:#1c2833;margin-bottom:4px;}
 .login-sub{font-size:13px;color:#8a9ab0;margin-bottom:28px;}
@@ -43,37 +39,14 @@ body{font-family:'Lato',sans-serif;background:#f0f3f7;min-height:100vh;display:f
 </head>
 <body>
 <div class="page">
+
+  <!-- LEFT — brand name only, centered -->
   <div class="left">
-    <div>
-      <div class="brand-name">Super<span>Mart</span></div>
-      <div class="brand-sub">Secure Management System</div>
-    </div>
-    <div class="left-body">
-      <div class="feature">
-        <div class="feat-icon">🔒</div>
-        <div>
-          <div class="feat-title">Role-Based Access Control</div>
-          <div class="feat-desc">Three-tier permission system keeping data secure across admin, manager and cashier roles.</div>
-        </div>
-      </div>
-      <div class="feature">
-        <div class="feat-icon">⚡</div>
-        <div>
-          <div class="feat-title">High-Performance Processing</div>
-          <div class="feat-desc">Multiprocessing and threaded transaction engines for peak-hour reliability.</div>
-        </div>
-      </div>
-      <div class="feature">
-        <div class="feat-icon">📊</div>
-        <div>
-          <div class="feat-title">Real-Time Analytics</div>
-          <div class="feat-desc">Vectorized NumPy computations deliver instant reports on sales and inventory.</div>
-        </div>
-      </div>
-    </div>
-    <div class="left-footer">SuperMart v1.0 &mdash; BSc Computer Security Project</div>
+    <div class="brand-name">Super<span>Mart</span></div>
+    <div class="brand-sub">Secure Management System</div>
   </div>
 
+  <!-- RIGHT — login form -->
   <div class="right">
     <div class="login-title">Welcome back</div>
     <div class="login-sub">Sign in to your account to continue</div>
@@ -101,6 +74,7 @@ body{font-family:'Lato',sans-serif;background:#f0f3f7;min-height:100vh;display:f
       <div class="cred-row"><span>cashier1</span><span>Cashier@123</span></div>
     </div>
   </div>
+
 </div>
 </body>
 </html>
