@@ -28,6 +28,7 @@ from modules.analytics import (sales_summary, sales_by_category, sales_by_produc
                                 demand_forecast, sales_over_time)
 from modules.benchmarks import (benchmark_transaction_throughput, benchmark_security_overhead,
                                  benchmark_vectorized_vs_loop)
+from modules.alerts import send_low_stock_report_email
 from modules.seeder import run_full_seed
 import modules.auth as auth_module
 
