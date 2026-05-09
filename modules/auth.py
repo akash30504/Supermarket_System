@@ -12,6 +12,50 @@ Roles & Permissions:
 
 from modules.database import get_connection, verify_password, hash_password
 from datetime import datetime
+import re
+import time
+
+# ── Password Strength Validation ─────────────────────────────────────────────
+def _validate_password_strength(password: str):
+    """Enforce minimum password security policy before storing."""
+    if len(password) < 8:
+        raise ValueError("Password must be at least 8 characters.")
+    if not re.search(r"[A-Z]", password):
+        raise ValueError("Password must contain at least one uppercase letter.")
+    if not re.search(r"[0-9]", password):
+        raise ValueError("Password must contain at least one digit.")
+    if not re.search(r"[^A-Za-z0-9]", password):
+        raise ValueError("Password must contain a special character (@, !, # etc).")
+    
+    # ── Account Lockout ───────────────────────────────────────────────────────────
+_failed_attempts = {}   # stores: username → (count, timestamp)
+MAX_ATTEMPTS     = 5    # lock after 5 wrong passwords
+LOCKOUT_SECONDS  = 300  # lock for 5 minutes
+
+def _check_lockout(username: str):
+    """Raise PermissionError if account is currently locked out."""
+    if username not in _failed_attempts:
+        return
+    count, last_time = _failed_attempts[username]
+    if count >= MAX_ATTEMPTS:
+        remaining = LOCKOUT_SECONDS - (time.time() - last_time)
+        if remaining > 0:
+            mins = int(remaining / 60) + 1
+            raise PermissionError(
+                f"Account locked after {MAX_ATTEMPTS} failed attempts. "
+                f"Try again in {mins} minute(s)."
+            )
+        else:
+            del _failed_attempts[username]   # lockout expired, reset
+
+def _record_failed(username: str):
+    """Record one failed login attempt."""
+    count, _ = _failed_attempts.get(username, (0, 0))
+    _failed_attempts[username] = (count + 1, time.time())
+
+def _clear_failed(username: str):
+    """Clear failed attempts after a successful login."""
+    _failed_attempts.pop(username, None)
 
 # ── Permission Matrix ────────────────────────────────────────────────────────
 PERMISSIONS = {
@@ -55,6 +99,7 @@ def login(username: str, password: str) -> AuthSession:
     Authenticate a user. Returns AuthSession on success, raises ValueError on failure.
     Also writes to audit_log.
     """
+    _check_lockout(username)            # ← ADD LINE 1: check lockout first
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -73,9 +118,11 @@ def login(username: str, password: str) -> AuthSession:
             raise ValueError("Account is disabled. Contact administrator.")
 
         if not verify_password(password, row["password_hash"], row["salt"]):
+            _record_failed(username)            # ← ADD LINE 2: record the failure
             _audit(conn, row["user_id"], "LOGIN_FAILED", "Wrong password")
             raise ValueError("Invalid username or password.")
 
+        _clear_failed(username)             # ← ADD LINE 3: clear on success
         global _current_session
         _current_session = AuthSession(row["user_id"], row["username"], row["role"])
         _audit(conn, row["user_id"], "LOGIN_SUCCESS", f"Role: {row['role']}")
@@ -125,6 +172,7 @@ def create_user(username: str, password: str, role: str):
     require_permission("manage_users")
     if role not in PERMISSIONS:
         raise ValueError(f"Invalid role '{role}'. Choose from: {list(PERMISSIONS.keys())}")
+    _validate_password_strength(password)  # check strength before hashing
     h, s = hash_password(password)
     conn = get_connection()
     try:
