@@ -136,6 +136,25 @@ pytest tests/ -v
 Tests cover: DB initialization, auth/RBAC, inventory CRUD, transaction processing,
 concurrency safety, analytics, and permission enforcement.
 
+## Email Alert Setup
+
+The system sends automatic low-stock alerts via Gmail.
+Credentials are NOT included for security reasons.
+
+To enable email alerts:
+1. Copy `email_config.example.py` and rename it to `email_config.py`
+2. Open `email_config.py` and fill in your Gmail address and App Password
+3. To get a Gmail App Password:
+   - Go to myaccount.google.com
+   - Security → 2-Step Verification (must be ON)
+   - Security → App passwords → Create → name it "SuperMart"
+   - Copy the 16-character password (remove spaces)
+4. Save the file — email alerts will work automatically
+
+Note: The system works fully without email configured.
+If email_config.py is missing, the system prints alerts to
+the terminal instead of sending emails.
+
 ---
 
 ## Key Technical Features
