@@ -1,15 +1,3 @@
-"""
-auth.py
--------
-Authentication and Role-Based Access Control (RBAC) module.
-Handles login, session management, and permission enforcement.
-
-Roles & Permissions:
-  admin   → all operations
-  manager → view reports, manage products/inventory, view transactions
-  cashier → process transactions, view own transactions
-"""
-
 from modules.database import get_connection, verify_password, hash_password
 from datetime import datetime
 import re
@@ -95,10 +83,7 @@ _current_session: AuthSession = None
 
 
 def login(username: str, password: str) -> AuthSession:
-    """
-    Authenticate a user. Returns AuthSession on success, raises ValueError on failure.
-    Also writes to audit_log.
-    """
+
     _check_lockout(username)            # ← ADD LINE 1: check lockout first
     conn = get_connection()
     cursor = conn.cursor()
