@@ -1,12 +1,3 @@
-"""
-seeder.py
----------
-Generates simulated supermarket data:
-  - ~1,000 product records across categories
-  - ~100,000 transaction records
-Used for performance benchmarking and testing as described in the PID.
-"""
-
 import random
 import time
 import sqlite3
@@ -88,12 +79,7 @@ def seed_products(target: int = 1000) -> int:
 
 
 def seed_transactions(target: int = 100_000, batch_size: int = 5000) -> int:
-    """
-    Seed approximately `target` transaction records using batch inserts.
-    Does NOT deduct stock (historical data simulation).
-    Uses a default cashier_id=1 (admin) for seeded data.
-    Transactions are spread across February 2026 (Feb 1 – Feb 28).
-    """
+    
     conn = get_connection()
     existing = conn.execute("SELECT COUNT(*) FROM transactions").fetchone()[0]
     if existing >= target:
