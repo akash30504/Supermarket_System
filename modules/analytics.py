@@ -1,11 +1,3 @@
-"""
-analytics.py
-------------
-Analytics & Reporting Module.
-Uses NumPy vectorized operations and pandas for fast aggregations.
-Generates sales summaries, inventory reports, and performance metrics.
-"""
-
 import time
 import numpy as np
 import pandas as pd
@@ -38,10 +30,7 @@ def _fetch_products_df() -> pd.DataFrame:
 # ── Sales Reports ─────────────────────────────────────────────────────────────
 
 def sales_summary() -> dict:
-    """
-    Overall sales summary using NumPy vectorized operations.
-    Returns totals, averages, and top metrics.
-    """
+
     require_permission("view_reports")
     start = time.perf_counter()
 
@@ -125,10 +114,7 @@ def sales_by_cashier() -> pd.DataFrame:
 
 
 def sales_over_time(freq: str = "D") -> pd.DataFrame:
-    """
-    Revenue aggregated over time.
-    freq: 'H' = hourly, 'D' = daily, 'W' = weekly, 'ME' = monthly
-    """
+
     require_permission("view_reports")
     df = _fetch_transactions_df()
     if df.empty:
