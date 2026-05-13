@@ -1,11 +1,3 @@
-"""
-transactions.py
----------------
-Transaction Processing Module.
-Supports both sequential and parallel (multiprocessing + multithreading) processing.
-Thread-safe via locks; uses process-safe queues for multiprocessing mode.
-"""
-
 import time
 import threading
 import multiprocessing
@@ -21,13 +13,7 @@ _db_lock = threading.Lock()
 # ── Single Transaction ────────────────────────────────────────────────────────
 
 def process_transaction(product_id: int, quantity: int, cashier_id: int = None) -> dict:
-    """
-    Process a single sales transaction.
-    - Checks stock availability
-    - Deducts stock atomically
-    - Records transaction
-    - Returns transaction record
-    """
+
     require_permission("process_transaction")
     session = get_session()
     c_id = cashier_id if cashier_id else session.user_id
@@ -78,11 +64,7 @@ def process_transaction(product_id: int, quantity: int, cashier_id: int = None) 
 # ── Batch Sequential Processing ───────────────────────────────────────────────
 
 def process_batch_sequential(transactions: list, cashier_id: int = None) -> dict:
-    """
-    Process a list of transaction dicts sequentially.
-    Each item: {"product_id": int, "quantity": int}
-    Returns summary with results and timing.
-    """
+
     require_permission("process_transaction")
     session = get_session()
     c_id = cashier_id if cashier_id else session.user_id
@@ -126,10 +108,7 @@ def _thread_worker(txn, cashier_id, results_list, errors_list):
 
 def process_batch_threaded(transactions: list, cashier_id: int = None,
                             num_threads: int = 4) -> dict:
-    """
-    Process transactions using multithreading (num_threads workers).
-    Good for I/O-bound workloads. Protected by _db_lock per transaction.
-    """
+
     require_permission("process_transaction")
     session = get_session()
     c_id = cashier_id if cashier_id else session.user_id
@@ -171,10 +150,7 @@ def process_batch_threaded(transactions: list, cashier_id: int = None,
 # ── Multiprocessing Batch Processing ─────────────────────────────────────────
 
 def _mp_worker(args):
-    """
-    Isolated worker for multiprocessing pool.
-    Cannot share DB connection or auth session — uses direct DB write.
-    """
+
     product_id, quantity, cashier_id = args
     import sqlite3
     import os
@@ -223,10 +199,7 @@ def _mp_worker(args):
 
 def process_batch_multiprocessing(transactions: list, cashier_id: int = None,
                                    num_processes: int = None) -> dict:
-    """
-    Process transactions using multiprocessing Pool.
-    Achieves true CPU parallelism. Each process gets its own DB connection.
-    """
+
     require_permission("process_transaction")
     session = get_session()
     c_id = cashier_id if cashier_id else session.user_id
