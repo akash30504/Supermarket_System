@@ -1,10 +1,3 @@
-"""
-alerts.py
----------
-Sends email alerts for low stock events.
-Uses Gmail SMTP with TLS (port 587) — works on all networks.
-"""
-
 import smtplib
 import datetime
 import socket
@@ -41,10 +34,7 @@ except Exception as e:
 def send_low_stock_email(product_name: str, stock_qty: int,
                           reorder_level: int, product_id: int,
                           txn_id: int = None, quantity_sold: int = None):
-    """
-    Send a low-stock email alert via Gmail SMTP (TLS port 587).
-    Triggered automatically when stock falls to or below 50 units.
-    """
+
     if not EMAIL_ENABLED:
         print(f"[Alert] Email not configured. Low stock: {product_name} ({stock_qty} left)")
         return
@@ -103,10 +93,7 @@ Login to SuperMart → Products → find product → click ± to adjust stock.
 
 
 def send_low_stock_report_email(low_stock_products: list):
-    """
-    Send a summary report email listing ALL products with stock <= 50.
-    Triggered when admin/manager clicks the Full Report button.
-    """
+
     if not EMAIL_ENABLED:
         print(f"[Alert] Email not configured. {len(low_stock_products)} low stock products found.")
         return
