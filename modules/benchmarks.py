@@ -1,11 +1,3 @@
-"""
-benchmarks.py
--------------
-Performance Benchmarking Module.
-Compares sequential vs threaded vs multiprocessing transaction throughput.
-Measures security overhead from auth/RBAC/hashing mechanisms.
-"""
-
 import time
 import random
 import hashlib
@@ -52,10 +44,7 @@ def _time_fn(fn, *args, **kwargs):
 
 def benchmark_transaction_throughput(batch_sizes: list = None,
                                       repeat: int = 1) -> dict:
-    """
-    Compare sequential vs threaded vs multiprocessing transaction processing.
-    For each batch_size, runs all three modes and records throughput.
-    """
+
     require_permission("run_benchmarks")
     from modules.transactions import (
         process_batch_sequential,
@@ -199,10 +188,7 @@ def benchmark_security_overhead(iterations: int = 1000) -> dict:
 # ── Vectorized Computation Benchmark ─────────────────────────────────────────
 
 def benchmark_vectorized_vs_loop(n: int = 100_000) -> dict:
-    """
-    Compare pure Python loop vs NumPy vectorized operation for
-    computing total revenue across N simulated transactions.
-    """
+
     require_permission("run_benchmarks")
     import numpy as np
 
