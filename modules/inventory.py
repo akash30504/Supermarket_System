@@ -1,10 +1,3 @@
-"""
-inventory.py
-------------
-Product and Inventory Management Module.
-Handles CRUD operations for products, stock adjustments, and low-stock alerts.
-"""
-
 from modules.database import get_connection
 from modules.auth import require_permission, get_session, _audit
 from modules.alerts import send_low_stock_email, send_low_stock_report_email
@@ -39,10 +32,7 @@ def add_product(product_name: str, category: str, unit_price: float,
 
 
 def update_product(product_id: int, **kwargs):
-    """
-    Update product fields. Allowed fields: product_name, category, unit_price,
-    reorder_level.
-    """
+
     require_permission("manage_products")
     allowed = {"product_name", "category", "unit_price", "reorder_level"}
     updates = {k: v for k, v in kwargs.items() if k in allowed}
@@ -153,11 +143,7 @@ def adjust_stock(product_id: int, delta: int, reason: str = "manual adjustment")
 
 def _deduct_stock_unsafe(conn, product_id: int, quantity: int,
                          txn_id: int = None):
-    """
-    Internal: deduct stock within an existing connection/transaction.
-    Raises ValueError if insufficient stock.
-    Sends email alert if stock falls to or below 50 units.
-    """
+
     row = conn.execute(
         "SELECT stock_qty FROM products WHERE product_id=?", (product_id,)
     ).fetchone()
