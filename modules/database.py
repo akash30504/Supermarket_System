@@ -1,10 +1,3 @@
-"""
-database.py
------------
-Initializes and manages the SQLite database for the Secure Supermarket System.
-Creates all tables: users, products, inventory, transactions, audit_log.
-"""
-
 import sqlite3
 import os
 import hashlib
