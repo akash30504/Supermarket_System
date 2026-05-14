@@ -1,3 +1,3 @@
-EMAIL_SENDER   = "akashmihisara21@gmail.com"     
-EMAIL_PASSWORD = "sdgnqsygfrvgqmtd"  
-EMAIL_RECEIVER = "akashmihisara21@gmail.com"      
+EMAIL_SENDER   = "supermartalerts@gmail.com"     
+EMAIL_PASSWORD = "brblkzpuijcmrote"  
+EMAIL_RECEIVER = "supermartalerts@gmail.com"      
