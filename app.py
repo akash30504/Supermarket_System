@@ -1,11 +1,3 @@
-"""
-app.py
-------
-Flask web application for the Secure Supermarket System.
-Run with: python app.py
-Then open: http://localhost:5000
-"""
-
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

@@ -1,15 +1,3 @@
-"""
-main.py
--------
-Main CLI Menu for the Secure High-Performance Supermarket System.
-Entry point for all user interactions.
-
-Default Credentials:
-  admin    / Admin@123
-  manager  / Manager@123
-  cashier1 / Cashier@123
-"""
-
 import os
 import sys
 
