@@ -1,11 +1,3 @@
-"""
-tests/test_system.py
----------------------
-Unit and integration tests for the Secure Supermarket System.
-Run with:  python -m pytest tests/ -v
-       or: python tests/test_system.py
-"""
-
 import sys
 import os
 import gc
